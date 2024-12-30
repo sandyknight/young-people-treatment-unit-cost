@@ -82,7 +82,7 @@ get_expenditure_data <- function() {
   )
   
   dt <-
-    data.table::merge.data.table(dt, d, by.x = "data_item_name", by.y = "data_item_name")
+    data.table::merge.data.table(dt, data_dictionary, by.x = "data_item_name", by.y = "data_item_name")
   
   dt[, period := substr(year_ending, 1, 4)][, period := paste(as.integer(period) - 1, substr(period, 3, 4), sep = "-")]
   
@@ -96,77 +96,6 @@ get_expenditure_data <- function() {
   
 }
 
-
-
-plot_expenditure_data_by_category <- function() {
-  
-dt <- get_expenditure_data()
-
-t <- 
-  dt[period == "2021-22", .(data_item_name, net_current_expenditure)]
-
-
-setnames(t, c("data_item_name", "baseline"))
-
-dt <- 
-  merge.data.table(dt, t, by = "data_item_name")
-
-rm(t)
-print(dt)
-dt |>
-  dplyr::mutate(description = stringr::str_replace(description, "misuse ", "misuse\n")) |>
-  ggplot(aes(x = period, y = net_current_expenditure)) +
-  geom_col(width = 0.5, colour = "black") +
-  geom_line(aes(
-    y = baseline,
-    x = rep(c(0, 2, 3, 4, 5, 6, 7.5), 5),
-    group = description,
-    colour = "Baseline (2021-22)"
-  )) +
-  facet_wrap( ~ description, scales = "free", ncol = 2) +
-  tinythemes::theme_ipsum_rc() +
-  scale_y_continuous(
-    labels = function(x)
-      scales::dollar(x, prefix = "£")
-  ) +
-  scale_colour_manual(values = c("Baseline (2021-22)" = "magenta")) +
-  theme(
-    legend.position = "bottom",
-    plot.caption = element_text(hjust = 0),
-    legend.justification = 0,
-    axis.text.x = element_text(
-      angle = 30,
-      vjust = 0.5,
-      hjust = 0.5
-    )
-  ) +
-  labs(
-    x = "Financial year",
-    y = "Reported net current expenditure",
-    colour = NULL,
-    title = "Reported net current expenditure on substance misuse",
-    subtitle = "by expenditure category",
-    caption = "Source:\nMHCLG, 'Local authority revenue expenditure and financing England: Revenue outturn multi-year data set'\nLast updated 3 December 2024"
-  )
-
-}
-
-png(filename = "plots/substance_misuse_expenditure_plot.png", width = 31, height = 35, units = "cm", res = 250)
-plot_expenditure_data_by_category()
-dev.off()
-
-
-# baseline <-
-#   as.numeric(dt_aggregate[period == "2021-22", .(total)])
-# 
-# dt_aggregate |> 
-#   ggplot(aes(x = period, y = total)) +
-#   geom_col(width = 0.5, colour = "black") +
-#   geom_hline(yintercept = baseline) +
-#   scale_y_continuous(
-#     labels = function(x)
-#       scales::dollar(x, prefix = "£")
-#   )
 
 
 # Days in treatment data --------------------------------------------------
