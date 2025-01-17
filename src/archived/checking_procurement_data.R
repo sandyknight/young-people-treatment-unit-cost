@@ -6,11 +6,11 @@ library(ggplot2)
 # https://www.contractsfinder.service.gov.uk/
 # where I did a search for awarded contracts with keywords:
 # ["substance misuse" OR "substance use" OR addiction]
-# There were 561 results. 
+# There were 561 results.
 
 
-df <- 
-  readr::read_csv("data/raw/notices.csv") |> 
+df <-
+  readr::read_csv("data/raw/notices.csv") |>
   janitor::clean_names()
 
 
@@ -23,26 +23,26 @@ d <-
 d <-
   d[!grepl(pattern = "smoking|detained|prison|homeless|testing|forensic|tobacco|housing|lodging|accommodation|employ|violence|waste|smoke", x = title, ignore.case = TRUE, perl = TRUE)]
 
-d <- 
+d <-
   d[!grepl(pattern = "department of|ministry of", x = organisation_name, ignore.case = TRUE)]
 
 
-d <- 
+d <-
   d[, .(awarded_date, organisation_name, title, description, supplier_name_address_ref_type_ref_number_is_sme_is_vcse, awarded_value)]
 
 
 data.table::setorder(d, awarded_value)
 
-d |> 
-  dplyr::mutate(title = forcats::as_factor(title)) |> 
+d |>
+  dplyr::mutate(title = forcats::as_factor(title)) |>
   ggplot(aes(x = title, y = awarded_value)) +
   geom_col() +
-  coord_flip() 
+  coord_flip()
 
 
-d <- 
-  d[,.(organisation_name, title, awarded_value, description)]
+d <-
+  d[, .(organisation_name, title, awarded_value, description)]
 
 
-d |> 
+d |>
   readr::write_excel_csv("data/processed/cyp_contracts.csv")
